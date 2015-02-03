@@ -55,7 +55,7 @@ function setup_localrc {
     elif is_fedora; then
         sudo yum install -y PyYAML
     fi
-    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
+    MY_ENABLED_SERVICES=`cd $WORKSPACE/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
     local original_enabled_services=$MY_ENABLED_SERVICES
 
     # TODO(afazekas): Move to the feature grid
@@ -135,6 +135,11 @@ CEILOMETER_BACKEND=$DEVSTACK_GATE_CEILOMETER_BACKEND
 LIBS_FROM_GIT=$DEVSTACK_PROJECT_FROM_GIT
 ZAQAR_BACKEND=$DEVSTACK_GATE_ZAQAR_BACKEND
 EOF
+
+    if [[ "$DEVSTACK_GATE_LIBVIRT_TYPE" == "parallels" ]]; then
+        echo "LIBVIRT_FIREWALL_DRIVER=nova.virt.firewall.NoopFirewallDriver" >>"$localrc_file"
+    fi
+
 
     if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
         echo "CINDER_SECURE_DELETE=False" >>"$localrc_file"
@@ -447,6 +452,7 @@ EOF
 
     echo "Running devstack"
     echo "... this takes 5 - 8 minutes (logs in logs/devstacklog.txt.gz)"
+    exit 0
     start=$(date +%s)
     sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
     end=$(date +%s)

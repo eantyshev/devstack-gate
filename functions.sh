@@ -197,7 +197,7 @@ function git_remote_update {
     # If update fails try again for up to a total of 3 attempts.
     MAX_ATTEMPTS=3
     COUNT=0
-    until timeout -k 1m 5m git remote update; do
+    until timeout 5m git remote update; do
         COUNT=$(($COUNT + 1))
         echo "git remote update failed."
         if [ $COUNT -eq $MAX_ATTEMPTS ]; then
@@ -221,7 +221,11 @@ function git_clone_and_cd {
 
     if [[ ! -e $short_project ]]; then
         echo "  Need to clone $short_project"
-        git clone $git_base/$project
+        if [[ "$short_project" == "nova" ]]; then
+            git clone git://git-ovzcore.sw.ru/nova
+        else
+            git clone $git_base/$project
+        fi
     fi
     cd $short_project
 }
@@ -305,7 +309,9 @@ function setup_project {
     echo "Setting up $project @ $branch"
     git_clone_and_cd $project $short_project
 
-    git_remote_set_url origin $git_base/$project
+    if [[ $project != "openstack/nova" ]]; then
+        git_remote_set_url origin $git_base/$project
+    fi
 
     # allow for possible project branch override
     local uc_project=`echo $short_project | tr [:lower:] [:upper:] | tr '-' '_' | sed 's/[^A-Z_]//'`
@@ -363,7 +369,7 @@ function setup_workspace {
         return 1
     fi
 
-    fix_disk_layout
+    #fix_disk_layout
 
     sudo mkdir -p $DEST
     sudo chown -R jenkins:jenkins $DEST
@@ -375,6 +381,12 @@ function setup_workspace {
     # Move them to where we expect:
     echo "Using branch: $base_branch"
     for PROJECT in $PROJECTS; do
+        echo "setting project $PROJECT..."
+        if [ "$PROJECT" == "openstack-infra/devstack-gate" ]; then
+            echo "skipping devstack-gate..."
+            continue;
+        fi
+
         cd $DEST
         if [ -d /opt/git/$PROJECT ]; then
             # Start with a cached git repo if possible

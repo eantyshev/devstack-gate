@@ -1,8 +1,8 @@
 config:
   default:
-    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
+    master: [default, glance, horizon, nova, keystone]
     kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
-    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
+    juno: [default, glance, horizon, nova, keystone]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
     # This can be used by functional jobs that only want their dependencies installed
     # and don't need to incur the overhead of installing all services in the process.
@@ -50,7 +50,7 @@ branches:
 features:
   default:
     base:
-      services: [mysql, rabbit, dstat]
+      services: [mysql, qpid, dstat]
 
   ceilometer:
     base:
